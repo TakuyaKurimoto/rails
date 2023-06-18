@@ -128,6 +128,7 @@ ActiveRecord::Schema.define do
     t.integer :format_record_id
     t.string :format_record_type
     t.column :name, :string
+    t.virtual :upper_name,  type: :string,  as: "UPPER(name)", stored: true if supports_virtual_columns?
     t.column :status, :integer, **default_zero
     t.column :last_read, :integer, **default_zero
     t.column :nullable_status, :integer

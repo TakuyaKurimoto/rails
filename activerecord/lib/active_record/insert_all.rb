@@ -18,6 +18,8 @@ module ActiveRecord
       if inserts.first.is_a?(ActiveRecord::Base)
         inserts = inserts.map(&:attributes)
         delete_timestamps_from_attributes!(inserts)
+        delete_virtual_columns_from_attributes!(inserts)
+        connection.assign_next_value_if_serial_column_is_nil!(model.columns, model.sequence_name, inserts)
       end
       @inserts = inserts.map(&:stringify_keys)
 
@@ -226,12 +228,21 @@ module ActiveRecord
       end
 
       def delete_timestamps_from_attributes!(attributes_array)
+        return unless record_timestamps?
         all_timestamp_attributes = model.all_timestamp_attributes_in_model
-        attributes_array.each do |attributes|
-          attributes.each do |column, value|
-            if all_timestamp_attributes.include?(column) && record_timestamps?
-              attributes.delete(column)
-            end
+        all_timestamp_attributes.each do |column|
+          attributes_array.each do |attributes|
+            attributes.delete(column)
+          end
+        end
+      end
+
+      def delete_virtual_columns_from_attributes!(attributes_array)
+        return unless connection.supports_virtual_columns?
+        virtual_columns = model.columns.select(&:virtual?).map(&:name)
+        virtual_columns.each do |column|
+          attributes_array.each do |attributes|
+            attributes.delete(column)
           end
         end
       end

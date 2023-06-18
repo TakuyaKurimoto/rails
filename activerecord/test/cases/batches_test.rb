@@ -826,6 +826,7 @@ class EachTest < ActiveRecord::TestCase
   end
 
   test ".in_batches with scope and multiple column ordering and using composite primary key" do
+    p Cpk::Book.sequence_name
     Cpk::Book.create(author_id: 1, number: 1)
     Cpk::Book.create(author_id: 1, number: 2)
     Cpk::Book.create(author_id: 1, number: 3)
